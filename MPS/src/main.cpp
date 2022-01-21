@@ -1,70 +1,63 @@
-#include <SFML/Graphics.hpp>
 #include <iostream>
-#include <cmath> 	
+#include <SFML/Graphics.hpp>
+#include <cmath>
 
-std::vector<sf::Vector2f> CalcCubicBezier(
-        const sf::Vector2f &start,
-        const sf::Vector2f &end,
-        const sf::Vector2f &startControl,
-        const sf::Vector2f &endControl,
-        const size_t numSegments)
-{
-    std::vector<sf::Vector2f> ret;
-    if (!numSegments) // Any points at all?
-        return ret;
 
-    ret.push_back(start); // First point is fixed
-    float p = 1.f / numSegments;
-    float q = p;
-    for (size_t i = 1; i < numSegments; i++, p += q) // Generate all between
-        ret.push_back(p * p * p * (end + 3.f * (startControl - endControl) - start) +
-                      3.f * p * p * (start - 2.f * startControl + endControl) +
-                      3.f * p * (startControl - start) + start);
-    ret.push_back(end); // Last point is fixed
-    return ret;
+class Function{
+public:
+	sf::VertexArray m_Function;
+	Function()
+	:x(0), y(0)
+	{
+	} 
+	bool drawParabola(bool draw, unsigned int m_x, unsigned int m_y)
+		{
+		m_Function.setPrimitiveType(sf::LineStrip);
+		if(!draw)
+			return 0;
+		else{
+			for(x = -50; x <= 50; x += 0.25)
+			m_Function.append(sf::Vertex(sf::Vector2f(x*20.f + m_x/2, -1*pow(x,2)*20.f+m_y/2)));
+			return 1;	
+			}
+		return 0;
+		}
+	bool drawSin(bool draw, unsigned int m_x, unsigned int m_y)
+		{
+		m_Function.setPrimitiveType(sf::LineStrip);
+		if(!draw)
+			return 0;
+		else{
+			for(x = -50; x <= 50; x += 0.25)
+			m_Function.append(sf::Vertex(sf::Vector2f(x*20.f, -1*sin(x)*20.f+m_y/2)));
+			return 1;	
+			}
+		return 0;
+		}
 	
-}
+private:
+	float x, y;
+};
 
-
+unsigned int height = 400;
+unsigned int width = 600;
 
 int main(){
-	sf::RenderWindow window(sf::VideoMode(600, 400), "MAPL");
-
-
+	sf::RenderWindow window(sf::VideoMode(width, height), "MPS");	
 	sf::Event event;
-	sf::Texture texture;
-	if(!texture.loadFromFile("rsrc/img.png")){
-	//
-	}	
+	Function func;
 
-	sf::Sprite sprite;
-	sprite.setTexture(texture);
-
+	sf::Clock clock;
 	while(window.isOpen()){
 		while(window.pollEvent(event)){
 			if(event.type == sf::Event::Closed)
 				window.close();
 		}
-	
-		window.clear();
-		sf::Vector2i mousePos = sf::Mouse::getPosition(window);
-		std::cout << mousePos.x << "  " << mousePos.y << std::endl;
-		sf::VertexArray vertices(sf::LinesStrip, 0);
-
-// Calculate the points on the curve (10 segments)
-	std::vector<sf::Vector2f> points =
-    	CalcCubicBezier(
-        	sf::Vector2f(600, 0),
-        	sf::Vector2f(0, 0),
-        	sf::Vector2f(200, 200),
-        	sf::Vector2f(200, 200),
-        	100);
-
-// Append the points as vertices to the vertex array
-	for (std::vector<sf::Vector2f>::const_iterator a = points.begin(); a != points.end(); ++a)
-    	vertices.append(sf::Vertex(*a, sf::Color::Red));
-		window.draw(sprite);
-		window.draw(vertices);
+		window.clear(sf::Color::Black);	
+		func.drawParabola(true, width, height);
+		func.drawSin(true, width, height);
+		window.draw(func.m_Function);
 		window.display();
 	}
+	return 0;
 }
