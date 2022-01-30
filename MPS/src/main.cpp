@@ -1,20 +1,36 @@
 #include <iostream>
 #include <SFML/Graphics.hpp>
 #include <cmath>
+#include <string>
+
 
 #include "plotFunction.hpp"
-
-unsigned int height = 500;
-unsigned int width = 1000;
+#include "changeFunction.hpp"
 
 
-float fps;
+static unsigned int height = 500;
+static unsigned int width = 1000;
+static std::string f_str;
+
+static short value_FunctionT = 0;
+static float fps;
 int main(){
     sf::ContextSettings settings;
-    settings.antialiasingLevel = 0.0;	
-	sf::RenderWindow window(sf::VideoMode(width, height), fps, sf::Style::Default, settings);	
+    settings.antialiasingLevel = 8.0;	
+	sf::RenderWindow window(sf::VideoMode(width, height), "MPS", sf::Style::Default, settings);	
+
 	sf::Event event;
 	Plot plot;
+	changeFunction c_Function;
+
+	sf::Font font;
+	if(!font.loadFromFile("calibri.ttf"))
+	{
+		std::cout << "Error Loading Font" << std::endl;
+	}
+
+	sf::Text text;
+	text.setFont(font);
 
 	sf::VertexArray y_axis(sf::Quads, 4);
 	y_axis[0].position = sf::Vector2f(width/2 + 1.5, height);
@@ -29,7 +45,7 @@ int main(){
 	x_axis[3].position = sf::Vector2f(width, height/2 + 1.5);
 
 	plot.drawParabola(width, height);
-	sf::Clock clock;
+	
 	float lastTime = 0;
 	while(window.isOpen()){
 		while(window.pollEvent(event)){
@@ -40,19 +56,27 @@ int main(){
    			event.size.width = window.getSize().x;
     		event.size.height = window.getSize().y;
 			}
+			if(event.type == sf::Event::KeyPressed)
+			{
+				c_Function.inputChange(event.key.code);
+				std::cout << c_Function.returnVar() << std::endl;
+			}
 		}
-		
-        float currentTime = clock.restart().asSeconds();
-        float fps = 1.f / (currentTime - lastTime);
-        lastTime = currentTime;
+		sf::Clock clock;
+		float fps;
 		window.clear();	
+		plot.drawFunction(width, height, c_Function.returnVar());
 		window.draw(plot.m_Function);
 		window.draw(y_axis);
 		window.draw(x_axis);
+		window.draw(text);
 		window.display();
-		std::cout << fps << std::endl;
-		
-		
+		float currentTime = clock.restart().asSeconds();
+        fps = 1.f / (currentTime - lastTime);
+        lastTime = currentTime;
+		fps = 1.f/lastTime;
+		f_str = std::to_string(fps);
+		text.setString(f_str);
 	}
 	return 0;
 }
