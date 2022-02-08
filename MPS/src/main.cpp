@@ -5,78 +5,81 @@
 
 
 #include "plotFunction.hpp"
-#include "changeFunction.hpp"
-
-
+#include "TextBox.hpp"
+// Static Variables
 static unsigned int height = 500;
 static unsigned int width = 1000;
 static std::string f_str;
+static int fps = 0;
+static float currentTime = 0;
+static float lastTime = 0;
 
-static short value_FunctionT = 0;
-static float fps;
 int main(){
     sf::ContextSettings settings;
-    settings.antialiasingLevel = 8.0;	
+    settings.antialiasingLevel = 8.0;	// antianalising to 8.0 Level MAX
+	// creating window
 	sf::RenderWindow window(sf::VideoMode(width, height), "MPS", sf::Style::Default, settings);	
-
 	sf::Event event;
+	// creating Objects for the change Function and the Plot Function
 	Plot plot;
-	changeFunction c_Function;
-
 	sf::Font font;
-	if(!font.loadFromFile("calibri.ttf"))
-	{
-		std::cout << "Error Loading Font" << std::endl;
+	if(!(font.loadFromFile("calibri.ttf"))){
+		std::cout << "error!" << std::endl;
 	}
-
 	sf::Text text;
-	text.setFont(font);
-
+	Textbox text1(20, sf::Color::White, true);
+	text1.setPosition(sf::Vector2f(40.f, 50.f));
+	text1.setLimit(true, 30);
+	text1.setFont(font);
+	// Drawing the X_Y Plane
 	sf::VertexArray y_axis(sf::Quads, 4);
-	y_axis[0].position = sf::Vector2f(width/2 + 1.5, height);
-	y_axis[1].position = sf::Vector2f(width/2 - 1.5, height);
-	y_axis[2].position = sf::Vector2f(width/2 - 1.5, 0);
-	y_axis[3].position = sf::Vector2f(width/2 + 1.5, 0);
+	y_axis[0].position = sf::Vector2f(width/2 + 0.5, height);
+	y_axis[1].position = sf::Vector2f(width/2 - 0.5, height);
+	y_axis[2].position = sf::Vector2f(width/2 - 0.5, 0);
+	y_axis[3].position = sf::Vector2f(width/2 + 0.5, 0);
 
 	sf::VertexArray x_axis(sf::Quads, 4);
-	x_axis[0].position = sf::Vector2f(0, height/2 + 1.5);
-	x_axis[1].position = sf::Vector2f(0, height/2 - 1.5);
-	x_axis[2].position = sf::Vector2f(width, height/2 - 1.5);
-	x_axis[3].position = sf::Vector2f(width, height/2 + 1.5);
+	x_axis[0].position = sf::Vector2f(0, height/2 + 0.5);
+	x_axis[1].position = sf::Vector2f(0, height/2 - 0.5);
+	x_axis[2].position = sf::Vector2f(width, height/2 - 0.5);
+	x_axis[3].position = sf::Vector2f(width, height/2 + 0.5);
 
-	plot.drawParabola(width, height);
+
+	sf::Clock clock;
+	sf::Time previousTime = clock.getElapsedTime();
+	sf::Time currentTime;
 	
-	float lastTime = 0;
+
 	while(window.isOpen()){
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Return)) {
+			text1.setSelected(true);
+		}
+		else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape)) {
+			text1.setSelected(false);
+		}
 		while(window.pollEvent(event)){
 			if(event.type == sf::Event::Closed)
 				window.close();
-			if (event.type == sf::Event::Resized)
-			{
-   			event.size.width = window.getSize().x;
-    		event.size.height = window.getSize().y;
+			if(event.type == sf::Event::TextEntered){
+				text1.typedOn(event);
 			}
-			if(event.type == sf::Event::KeyPressed)
-			{
-				c_Function.inputChange(event.key.code);
-				std::cout << c_Function.returnVar() << std::endl;
-			}
-		}
-		sf::Clock clock;
-		float fps;
-		window.clear();	
-		plot.drawFunction(width, height, c_Function.returnVar());
-		window.draw(plot.m_Function);
-		window.draw(y_axis);
+
+		}// starts clock
+		window.clear();	 // Clears Window
+		plot.drawFunction(width, height); // Create Function
+		text1.drawTo(window);
+		window.draw(plot.m_Function);// Draw Function
+		window.draw(y_axis); // Draw the X_Y Plane
 		window.draw(x_axis);
-		window.draw(text);
-		window.display();
-		float currentTime = clock.restart().asSeconds();
-        fps = 1.f / (currentTime - lastTime);
-        lastTime = currentTime;
-		fps = 1.f/lastTime;
+		//calculating FPS
+		currentTime = clock.getElapsedTime();
+		fps = 1.0f / (currentTime.asSeconds() - previousTime.asSeconds()); 
+		previousTime = currentTime;
+		// Change Float Value to string
 		f_str = std::to_string(fps);
 		text.setString(f_str);
+		window.draw(text);	
+		window.display();
 	}
 	return 0;
 }
