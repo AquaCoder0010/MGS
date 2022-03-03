@@ -1,5 +1,5 @@
 #pragma once
-#include <iostream>
+
 #include <sstream>
 #include <SFML/Graphics.hpp>
 
@@ -65,7 +65,7 @@ public:
 	}
 
 	// Function for event loop:
-	void typedOn(sf::Event input) {
+	void typedOn(sf::Event &input) {
 		if (isSelected) {
 			int charTyped = input.text.unicode;
 
