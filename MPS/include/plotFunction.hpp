@@ -2,16 +2,18 @@
 #include <SFML/Graphics.hpp>
 #include <cmath>
 #include "sleep.hpp"
+#include "Parser.hpp"
+
 
 #define e 2.71828 
 #define pi 3.14159
-
 
 class Plot
 {
     public:
         Plot()
-        :grid_tex(), sprite(), function(), x_axis(), y_axis(), drawing(false), curve()
+        :grid_tex(), sprite(), function(), x_axis(), y_axis(), drawing(false), curve(), parser(),
+        function_str()
         {
             if(grid_tex.loadFromFile("rsrc/grid.png"))
             {
@@ -49,28 +51,38 @@ class Plot
 	        x_axis[3].position = sf::Vector2f(width, height/2 + 1);
 
         }
-        void startDrawing()
+        void startDrawing(std::string equa)
         {
             drawing = true;
+            function_str = equa;
+            function.clear();
+            x = -25;
         }
         bool drawingState()
         {
             return drawing;
         }
+
+        float getVertexCount()
+        {
+            return function.getVertexCount();
+        }
+
+
         void drawFunction(sf::RenderWindow &window)
         {
             while(x < 25 && drawing == true)
             {
                 aq::sleep(0.01);
-                x += 0.2;
+                x += 0.3;
                 window.clear();
+
+                parser.replaceX(function_str, x);
+                parser.Parse();
                 curve.setPosition(sf::Vector2f(x*20.f + window.getSize().x/2,  
-                    -1*( sin(x) )*20.f + window.getSize().y/2));
-                function.append(
-                    sf::Vertex(sf::Vector2f
-			(x*20.f + window.getSize().x/2,  
-                    -1*( sin(x) )*20.f + window.getSize().y/2)));
-               
+                    -1*( parser.getValue() ) *20.f + window.getSize().y/2));
+                function.append(sf::Vertex(sf::Vector2f(x*20.f + window.getSize().x/2,  
+                    -1*( parser.getValue() )*20.f + window.getSize().y/2)));
                 window.draw(function);
                 window.draw(curve);
                 window.draw(sprite);
@@ -78,7 +90,55 @@ class Plot
                 window.draw(y_axis);
                 window.display();
             }
-            if(x > 15 || drawing == false || (x > 15 && drawing == false))
+            while(x < 25 && drawing == true && function_str == "sin(x)")
+            {
+                aq::sleep(0.01);
+                x += 0.3;
+                window.clear();
+                curve.setPosition(sf::Vector2f(x*20.f + window.getSize().x/2,  
+                    -1*( sin(x) ) *20.f + window.getSize().y/2));
+                function.append(sf::Vertex(sf::Vector2f(x*20.f + window.getSize().x/2,  
+                    -1*( sin(x) )*20.f + window.getSize().y/2)));
+                window.draw(function);
+                window.draw(curve);
+                window.draw(sprite);
+                window.draw(x_axis);
+                window.draw(y_axis);
+                window.display();
+            }
+            while(x < 25 && drawing == true && function_str == "cos(x)")
+            {
+                aq::sleep(0.01);
+                x += 0.3;
+                window.clear();
+                curve.setPosition(sf::Vector2f(x*20.f + window.getSize().x/2,  
+                    -1*( cos(x) ) *20.f + window.getSize().y/2));
+                function.append(sf::Vertex(sf::Vector2f(x*20.f + window.getSize().x/2,  
+                    -1*( cos(x) )*20.f + window.getSize().y/2)));
+                window.draw(function);
+                window.draw(curve);
+                window.draw(sprite);
+                window.draw(x_axis);
+                window.draw(y_axis);
+                window.display();
+            }
+            while(x < 25 && drawing == true && function_str == "tan(x)")
+            {
+                aq::sleep(0.01);
+                x += 0.3;
+                window.clear();
+                curve.setPosition(sf::Vector2f(x*20.f + window.getSize().x/2,  
+                    -1*( tan(x) ) *20.f + window.getSize().y/2));
+                function.append(sf::Vertex(sf::Vector2f(x*20.f + window.getSize().x/2,  
+                    -1*( tan(x) )*20.f + window.getSize().y/2)));
+                window.draw(function);
+                window.draw(curve);
+                window.draw(sprite);
+                window.draw(x_axis);
+                window.draw(y_axis);
+                window.display();
+            }
+            if(x > 10 || drawing == false || (x > 10 && drawing == false))
             {
                 drawing = false;
                 window.clear();
@@ -86,9 +146,10 @@ class Plot
                 window.draw(sprite);
                 window.draw(x_axis);
                 window.draw(y_axis);
-                window.display();
             }
         }
+
+        
     private:
         sf::Texture grid_tex;
         sf::Sprite sprite;
@@ -96,6 +157,9 @@ class Plot
         sf::VertexArray x_axis;
         sf::VertexArray y_axis;
         sf::CircleShape curve;
+        sf::Text text;
+        Parser parser;
+        std::string function_str;
     private:
         bool drawing;
         float x;

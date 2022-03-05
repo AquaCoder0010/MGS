@@ -8,6 +8,8 @@
 #define ENTER_KEY 13
 #define ESCAPE_KEY 27
 
+
+
 class Textbox {
 public:
 	Textbox(int size, sf::Color color, bool sel) {
@@ -17,7 +19,7 @@ public:
 
 		// Check if the textbox is selected upon creation and display it accordingly:
 		if(isSelected)
-			textbox.setString("_");
+			textbox.setString("|");
 		else
 			textbox.setString("");
 	}
@@ -80,6 +82,7 @@ public:
 					else if (text.str().length() > limit && charTyped == DELETE_KEY) {
 						deleteLastChar();
 					}
+					
 				}
 				// If no limit exists, just run the function:
 				else {
@@ -104,7 +107,8 @@ private:
 		}
 		text.str("");
 		text << newT;
-		textbox.setString(text.str() + "_");
+		textbox.setString(text.str() + "|");
+		std::cout << text.str() << std::endl;
 	}
 
 	// Get user input:
@@ -120,6 +124,7 @@ private:
 			}
 		}
 		// Set the textbox text:
-		textbox.setString(text.str() + "_");
+		textbox.setString(text.str() + "|");
+		std::cout << text.str() << std::endl;
 	}
 };
