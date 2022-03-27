@@ -1,81 +1,60 @@
-#include <iostream>
-#include <string>
-#include <SFML/System.hpp>
-
-#include "plotFunction.hpp"
+#include <SFML/Graphics.hpp>
+#include "Plot.hpp"
 #include "TextBox.hpp"
-#include "Parser.hpp"
 
-static short stateSelected = 0;
-
-
-
-
-int main(int argc, char* argv[])
-{	
+int main()
+{
 	sf::ContextSettings settings;
-    settings.antialiasingLevel = 0.0;
+    settings.antialiasingLevel = 8.0;
 	sf::RenderWindow window(sf::VideoMode(1000, 500), "MPS",  sf::Style::Close, settings);
-	window.setActive(false); 
-	Plot plot;
+	window.setVerticalSyncEnabled(true);
 
-	sf::Font font;
-	Textbox textBox(20, sf::Color::White, true);
-	textBox.setLimit(true, 10);
-	textBox.setPosition(sf::Vector2f(20.f, 20.f));
-
-	if(font.loadFromFile("calibri.ttf"))
-	{
-		textBox.setFont(font);
-		
-	}
-	else
-	{
-		std::cout << "error loading" << std::endl;
-	}
-
-	plot.drawPlane(window.getSize().x, window.getSize().y);
-
-
-	textBox.setSelected(true);
 	sf::Event event;
+
+	Plot plot;
+	plot.drawPlane(window.getSize().x - 200, window.getSize().y);
+	plot.getWindowSize(window.getSize().x - 200, window.getSize().y);
+
+		
+	Textbox textBox(20, sf::Color::White, true);
+	textBox.setLimit(true, 60);
+	textBox.setPosition(sf::Vector2f(20.f, 20.f));
+	sf::Font font;
+	if(font.loadFromFile("calibri.ttf")){
+		textBox.setFont(font);
+	}
 	while(window.isOpen())
 	{
 		while(window.pollEvent(event))
 		{
-			if(plot.drawingState() == false)
-			{
-				textBox.setSelected(true);
-			}
-			if(sf::Keyboard::isKeyPressed(sf::Keyboard::Enter))
-			{
-				textBox.setSelected(true);
-				
-			}
-
-			if(sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))
-			{
-				textBox.setSelected(false);
-				plot.startDrawing(textBox.getText());
-			}
-
 			if(event.type == sf::Event::Closed)
-			{
 				window.close();
-			}
-			if(event.type == sf::Event::TextEntered)
+			if(event.type == sf::Event::KeyPressed)
 			{
-				textBox.typedOn(event);
+				if(sf::Keyboard::isKeyPressed(sf::Keyboard::PageUp))
+					textBox.setSelected(true);				
+
+				if(sf::Keyboard::isKeyPressed(sf::Keyboard::PageDown))
+					textBox.setSelected(false);
+
+				if(event.key.code == sf::Keyboard::Enter)
+					plot.startDrawing(true);
+					
+				if(!event.key.code == sf::Keyboard::Enter)
+					plot.startDrawing(false);
+
+				plot.processEvents(event.key.code, true);
 			}
+			if(event.type == sf::Event::KeyReleased)
+				plot.processEvents(event.key.code, false);
+			if(event.type == sf::Event::TextEntered)
+				textBox.typedOn(event);
+			
 		}
-		
 		window.clear();
-
-		plot.drawFunction(window);
+		plot.update();
+		plot.drawTo(window);
 		textBox.drawTo(window);
-		window.display();		
-		
+		window.display();
 	}
-	return 0;
 }
-
