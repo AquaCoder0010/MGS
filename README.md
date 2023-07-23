@@ -1,5 +1,5 @@
 # MGS
-Mathimatical Graphical Software
+Mathematical Graphical Software
 
 a software made to draw simple but accurate Functional Graphs
 
