@@ -1,4 +1,4 @@
-# MPS
+# MGS
 Mathimatical Graphical Software
 
 a software made to draw simple but accurate Functional Graphs
