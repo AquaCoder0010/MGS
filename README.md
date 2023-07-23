@@ -1,5 +1,5 @@
 # MPS
-Maths Plotting Software
+Mathimatical Graphical Software
 
 a software made to draw simple but accurate Functional Graphs
 
